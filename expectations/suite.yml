@@ -1,0 +1,6 @@
+suite_name: members_suite
+expectations:
+  - {type: unique, column: member_id}
+  - {type: accepted_values, column: status, values: [active, inactive]}
+  - {type: not_null, column: age}
+
