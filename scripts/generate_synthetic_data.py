@@ -1,11 +1,14 @@
-import pandas as pd, numpy as np
 from pathlib import Path
-RNG=np.random.default_rng(12)
-ROOT=Path(__file__).resolve().parents[1]
-DATA=ROOT/"data"; DATA.mkdir(parents=True, exist_ok=True)
-rows=[{"member_id":f"M{i:04d}","status":RNG.choice(["active","inactive"]),"age":int(RNG.integers(18,90))} for i in range(1,201)]
-rows.append({"member_id":"M0001","status":"active","age":40})  # duplicate for fail demo
-rows.append({"member_id":"M9999","status":"unknown","age":30})
-pd.DataFrame(rows).to_csv(DATA/"members.csv",index=False)
-print("Wrote DQ dataset")
-
+import numpy as np, pandas as pd
+ROOT = Path(__file__).resolve().parents[1]
+DATA = ROOT / "data"; DATA.mkdir(parents=True, exist_ok=True)
+RNG = np.random.default_rng(23)
+n = 2000
+df = pd.DataFrame({
+    "claim_id": [f"CLM{i:06d}" for i in range(n)],
+    "claim_type": ["MEDICAL"] * (n - 23) + ["REFUND"] * 23,
+    "paid_amount": np.concatenate([RNG.uniform(10, 5000, n - 23), -RNG.uniform(10, 800, 23)]).round(2),
+    "service_date": "2024-05-01",
+})
+df.to_csv(DATA / "claims_lines.csv", index=False)
+print("claims", n, "negatives", 23)

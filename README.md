@@ -1,111 +1,29 @@
-# Great Expectations Data Quality Lab
+# One Suite, One Failed Expectation
 
-**Author:** [Faiz Elahi](https://github.com/faizilahi) (`faizilahi`) · **Type:** EDUCATIONAL LAB · **Synthetic data only**
+[Faiz Elahi](https://www.linkedin.com/in/faizilahi) — [pendataco.com](https://pendataco.com) — [github.com/faizilahi](https://github.com/faizilahi)
 
----
+Synthetic data only. No vendor-customer employment claim.
 
-## Educational disclaimer
+A Great-Expectations-style suite on synthetic claims lines expects
+`paid_amount >= 0`. One run failed with **23** negative paid rows from a refund
+sign convention the suite had not yet allowed.
 
-This is an **educational portfolio lab**. Datasets are **synthetic**. It does **not** claim employment at a customer, hospital, bank, SAP shop, or Oracle estate. No real PHI/PII. No live cloud spend. No API keys required.
+## The suite
 
----
+`suites/claims_suite.json` — expect columns, null rates, and `paid_amount >= 0`.
 
-## Problem statement
+## The failure
 
-Boards need failing tests before publish — uniqueness, nulls, accepted values — not only dashboard eyeballing.
+Expectation `expect_column_values_to_be_between` on `paid_amount` failed:
+unexpected count **23**.
 
-**Domain focus:** Shift-left data quality
+## The rows
 
----
-
-## Why this tool (Great Expectations-style expectation suites)
-
-| Manual spot checks | Expectation suite in git |
-|---|---|
-| Silent null spikes | Explicit fail report |
-
----
-
-## Architecture
-
-```mermaid
-flowchart LR
-  GEN[generate_synthetic_data.py]
-  DATA[data/*.csv]
-  RUN[run_lab.py]
-  OUT[output/*.csv]
-  CHART[generate_charts.py]
-  IMG[docs/images/*.png]
-  GEN --> DATA --> RUN --> OUT
-  OUT --> CHART --> IMG
-```
-
-See [`docs/architecture.md`](docs/architecture.md).
-
----
-
-## Dataset dictionary
-
-| File | Notes |
-|------|-------|
-| `data/members.csv` | Synthetic |
-| `expectations/suite.yml` | Rules |
-| `output/summary.csv` | Pass/fail |
-
----
-
-## Prerequisites
-
-- Python 3.10+
-- Packages in `requirements.txt`
-
----
-
-## How to run
+`output/bad_rows.csv` lists the 23 refund lines (negative paid). After updating
+the suite to allow negatives when `claim_type='REFUND'`, the suite passes.
 
 ```powershell
-cd "great-expectations-data-quality-lab"
-python -m venv .venv
-.\\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 python scripts/generate_synthetic_data.py
-python src/run_lab.py
-python scripts/generate_charts.py
+python src/run_suite.py
 ```
-
-Inspect `output/summary.csv` and `docs/images/primary_metric.png`.
-
----
-
-## Local vs cloud (honest)
-
-Minimal expectation runner in Python (GE-shaped). Full Great Expectations OSS optional; no cloud GE.
-
----
-
-## Results interpretation
-
-Open `output/` CSVs and the PNGs under `docs/images/`. Numbers are synthetic teaching fixtures — use them to explain grain, filters, and control totals, not as real business KPIs.
-
----
-
-## Limitations
-
-- Stand-in engines (DuckDB/SQLite/pandas) replace paid MPP/warehouses where noted.
-- Simplified schemas vs production SAP/Oracle/Hive estates.
-- Charts are matplotlib teaching visuals, not vendor BI embeds.
-
----
-
-## Exercises
-
-1. Add a regex expectation on member_id.
-2. Fail volume anomaly vs yesterday.
-3. Wire suite into an Airflow gate note.
-
----
-
-## License / attribution
-
-Educational portfolio content by Faiz Elahi. Synthetic data for teaching only.
-
